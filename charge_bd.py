@@ -1,8 +1,3 @@
-#Rodar comandos
-#sudo apt-get update -y
-#sudo apt-get install -y python3-psycopg2
-#pip install psycopg2-binary
-
 #Criar banco de dados bd_log
 
 
