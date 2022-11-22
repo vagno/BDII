@@ -7,10 +7,8 @@
 
 import csv
 
-
 # Carrega o arquivo json, e armazena dados iniciais no banco de dados
 #import charge_bd
-
 
 
 # Leitura arquivo de entrada do Log
@@ -21,7 +19,7 @@ arq.close()
 
 #retorna qtd de linhas do log
 n_linhas_log = len(arq_log)
-print("\nnumero de linhas do codigo: ",n_linhas_log)
+#print("\nnumero de linhas do codigo: ",n_linhas_log)
 
 #for i in range(n_linhas_log):
     #print(arq_log[i])
@@ -50,7 +48,7 @@ for i in range(n_linhas_log-1,0,-1): # linhas de forma decremental
             if (arq_log[i][l] != ">"):
                 temp_x += arq_log[i][j]
                 #print("temp_x",temp_x)
-        print("commit na linha:",i)
+        #print("commit na linha:",i)
         temp = (i, temp_x)
         T_commits.append(temp)
 
@@ -93,9 +91,16 @@ list_redo = sorted(set(list_redo))
 print("list_redo", list_redo)
 
 
+
+
+# Função para atualizar dados do redo
+def update_db(a,b,c):
+    d = 0
+
+
 # Função para procedimento do redo
 def realiza_redo(linha):
-    print("linha",linha)
+    #print("linha",linha)
     # realizar as operações
     comp_start = arq_log[linha].find("start")
     comp_CKPT = arq_log[linha].find("CKPT")
@@ -105,21 +110,51 @@ def realiza_redo(linha):
 
     if comp_start != 1 and comp_CKPT != 1 and comp_commit != 1 and comp_crash != 1:
         #tem uma operação para verificar necessidade de fazer o redo
-        # list_redo = [ T1 , T4 ]
-        # <start T1>
-        # <T3,2,B,30,1000>
-        # <T1,1,A,20,2000>
-        # < transaçao, linha, variavel, redo, undu>
-        for j in range(len(arq_log[linha])):
-            if j!= 0: #inicia leitura no index 1
-                # encontrar transação atual e verificar se esta na lista do redo
-                temp_x =""
-                if (arq_log[i][l] == ","):
-                    break
-                else:
-                    #temp_x += arq_log[i][j]
-                    #print("temp_x",temp_x)
-                    a=0
+        #print("linha de transação", + linha)
+
+        # encontrar transação atual e verificar se esta na lista do redo
+        for k in range(len(list_redo)):
+            t_list_redo = list_redo[k] + "," #
+            temp = arq_log[linha].find(t_list_redo)
+            #print ("t_list_redo",t_list_redo)
+
+            aux = 0 # variavel para salvar os indices
+            if temp == 1: # realizar redo nesta transaçao
+                print(arq_log[linha])
+                d_t = [list_redo[k]] # transação
+                d_id = [] # id da tupla
+                d_l = [] # coluna
+                d_v = [] # Valor antigo
+                ### <T1,1,A,20,2000>
+                ### < transaçao, id, coluna, redo, undu>
+                ### <transação, “id da tupla”,”coluna”, “valor antigo”, “valor novo”>.
+                aux = len(list_redo[k]) + 2 # tamanho da transação na lista redu
+                # se deslocando na transação pelo incremento do indice até encontar "," por dado
+                temp_concatena = ""
+                while (arq_log[linha][aux] != ","):
+                    temp_concatena = temp_concatena + arq_log[linha][aux]
+                    aux += 1
+                d_id = temp_concatena
+                aux += 1
+                temp_concatena = ""
+                while (arq_log[linha][aux] != ","):
+                    temp_concatena = temp_concatena + arq_log[linha][aux]
+                    aux += 1
+                d_l = temp_concatena
+                aux += 1
+                temp_concatena = ""
+                while (arq_log[linha][aux] != ","):
+                    temp_concatena = temp_concatena + arq_log[linha][aux]
+                    aux += 1
+                d_v = temp_concatena
+
+                print ("d_t",d_t)
+                print ("d_id",d_id)
+                print ("d_l",d_l)
+                print ("d_v",d_v)
+
+                # Chama função para fazer update no banco de dados passando os parametros
+                update_db (d_id , d_l , d_v)
 
         
 
@@ -144,5 +179,4 @@ for i in range(n_linhas_log):
     realiza_redo(i + list_seq_redo[0]) 
     if (i + list_seq_redo[0] == n_linhas_log-1):
         break
-
-#print(T_commits)
+## umas acrecentadinha ao avanço do trabalho.
