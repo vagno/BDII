@@ -31,7 +31,6 @@ cursor.execute("CREATE TABLE dados (id serial PRIMARY KEY, A VARCHAR(50), B INTE
 print("Tabela criada")
 
 
-#cursor.execute("INSERT INTO inventory (A, B) VALUES (%s, %s);", ("banana", 150))
 #========================================================
 #LER ARQUIVO JSON
 with open("metadado.json", encoding='utf-8') as file:
