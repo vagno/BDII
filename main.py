@@ -6,9 +6,25 @@
 #executar na pasta do arquivo principal
 
 import csv
+import psycopg2  # Acessar banco de dados
 
 # Carrega o arquivo json, e armazena dados iniciais no banco de dados
 #import charge_bd
+import charge_log
+
+
+# Configurações para acesso ao banco de dados
+host = 'localhost'
+dbname = 'bd_log'
+user = 'postgres'
+#password = 'postgres'
+password = 'naruto'
+sslmode = 'require'
+#user = input("Digite o nome do banco:")
+#password = input ("Digite a senha para acesso ao banco:")
+# String para conexão ao banco de dados
+conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
+
 
 
 # Leitura arquivo de entrada do Log
@@ -79,7 +95,7 @@ print ("transações do ckp:", transacao_ckp)
 print("transações dos commit:",T_commits)
 
 # Verificar os commits apos o ckp
-list_redo= [] #lista para deletar
+list_redo= [] #lista para saber quais transições foram commitadas apos ckp
 for i in range(len(transacao_ckp)):
     for j in range(len(T_commits)):
         if (T_commits[j][0] > transacao_ckp[i][0]): # transação pode ser excluida no ckp
@@ -88,14 +104,25 @@ for i in range(len(transacao_ckp)):
             list_redo.append(T_commits[j][1])
 
 list_redo = sorted(set(list_redo))
-print("list_redo", list_redo)
+#print("list_redo:", list_redo)
 
 
 
 
 # Função para atualizar dados do redo
-def update_db(a,b,c):
-    d = 0
+def update_db(id , l , valor):
+    string = "UPDATE dados SET " + l + "=" + valor + " WHERE id=" + id + ";"
+    print ("string: ",string)
+    conn = psycopg2.connect(conn_string)
+    #print("Conexão estabelicida")
+    cursor = conn.cursor()
+    # atualizar a tabela
+    cursor.execute(string)
+    print("Tabela atualizada")
+    conn.commit()
+    cursor.close()
+    #conn.close()
+    print("Conexão fechada")
 
 
 # Função para procedimento do redo
@@ -116,7 +143,6 @@ def realiza_redo(linha):
         for k in range(len(list_redo)):
             t_list_redo = list_redo[k] + "," #
             temp = arq_log[linha].find(t_list_redo)
-            #print ("t_list_redo",t_list_redo)
 
             aux = 0 # variavel para salvar os indices
             if temp == 1: # realizar redo nesta transaçao
@@ -160,11 +186,12 @@ def realiza_redo(linha):
 
 
 list_seq_redo = [] # para inicial pelo mais antigo (salva a linha)
-# Buscar inicio das transações para realizar o redo
+# Buscar inicio das transações <start> para realizar o redo
 for j in range(len(list_redo)):
+    
     for i in range(n_linhas_log-1,0,-1): # linhas de forma decremental
         linha_start = arq_log[i].find("start " + list_redo[j]) # valor 1 (encontrou), valor -1(não encontrou)
-        
+        #print("encontrou: ",arq_log[i])
         if (linha_start == 1):
             #print("encontrou",arq_log[i])
             #print("linha", i)
@@ -173,10 +200,11 @@ for j in range(len(list_redo)):
 
 # Faz sequencia da lista mais antiga
 list_seq_redo.sort()
+#print("list_seq_redo",list_seq_redo)
 
-# passar linhas a partir do inicio do redu
+# passar linhas a partir do inicio do redo
 for i in range(n_linhas_log):
     realiza_redo(i + list_seq_redo[0]) 
     if (i + list_seq_redo[0] == n_linhas_log-1):
         break
-## umas acrecentadinha ao avanço do trabalho.
+
