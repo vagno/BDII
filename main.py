@@ -91,8 +91,9 @@ for i in range(n_linhas_log-1,0,-1): # linhas de forma decremental
                     break
 
 
-print ("transações do ckp:", transacao_ckp)
-print("transações dos commit:",T_commits)
+#print ("transações do ckp:", transacao_ckp)
+#print("transações dos commit:",T_commits)
+print("\n")
 
 # Verificar os commits apos o ckp
 list_redo= [] #lista para saber quais transições foram commitadas apos ckp
@@ -119,7 +120,7 @@ def update_db( id , l , valor):
     cursor = conn.cursor()
     # lẽ o valor do dado salvo
     cursor.execute(temp)
-    busca_valor = cursor.fetchone()
+    busca_valor = cursor.fetchone() # apenas uma linha
     if (busca_valor[0] != valor): # o dado deve ser atualizado
         
         string = "UPDATE dados SET " + l + "=" + valor + " WHERE id=" + id + ";"
@@ -199,7 +200,7 @@ for j in range(len(list_redo)):
         linha_start = arq_log[i].find("start " + list_redo[j]) # valor 1 (encontrou), valor -1(não encontrou)
         #print("encontrou: ",arq_log[i])
         if (linha_start == 1):
-            print("encontrou",arq_log[i])
+            #print("encontrou",arq_log[i])
             #print("linha", i)
             list_seq_redo.append(i)
             break
@@ -233,3 +234,4 @@ linhas = arq.readlines()
 print("\n")
 for linha in linhas:
     print(linha)
+
