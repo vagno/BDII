@@ -7,10 +7,11 @@
 
 import csv
 import psycopg2  # Acessar banco de dados
+#import json
 
 # Carrega o arquivo json, e armazena dados iniciais no banco de dados
-#import charge_bd
-#import charge_log
+#import charge_bd    # Cria o banco de dados e carrega dados json
+import charge_log   # Carrega o arquivo de log
 
 
 # Configurações para acesso ao banco de dados
@@ -18,10 +19,9 @@ host = 'localhost'
 dbname = 'bd_log'
 user = 'postgres'
 #password = 'postgres'
-password = 'naruto'
 sslmode = 'require'
 #user = input("Digite o nome do banco:")
-#password = input ("Digite a senha para acesso ao banco:")
+password = input ("Digite a senha para acesso ao banco:")
 # String para conexão ao banco de dados
 conn_string = "host={0} user={1} dbname={2} password={3} sslmode={4}".format(host, user, dbname, password, sslmode)
 
@@ -111,14 +111,22 @@ list_redo = sorted(set(list_redo))
 
 # Função para atualizar dados do redo
 def update_db( id , l , valor):
-    string = "UPDATE dados SET " + l + "=" + valor + " WHERE id=" + id + ";"
-    print ("string: ",string)
+    
+    temp = "select " + l + " from dados WHERE id=" + id + ";"
+    #print(temp)
     conn = psycopg2.connect(conn_string)
     #print("Conexão estabelicida")
     cursor = conn.cursor()
-    # atualizar a tabela
-    cursor.execute(string)
-    #print("Tabela atualizada")
+    # lẽ o valor do dado salvo
+    cursor.execute(temp)
+    busca_valor = cursor.fetchone()
+    if (busca_valor[0] != valor): # o dado deve ser atualizado
+        
+        string = "UPDATE dados SET " + l + "=" + valor + " WHERE id=" + id + ";"
+        #print ("string: ",string)
+        # atualizar a tabela
+        cursor.execute(string)
+        #print("Tabela atualizada")
     conn.commit()
     cursor.close()
     #conn.close()
@@ -187,7 +195,7 @@ def realiza_redo(linha):
 list_seq_redo = [] # para inicial pelo mais antigo (salva a linha)
 # Buscar inicio das transações <start> para realizar o redo
 for j in range(len(list_redo)):
-    for i in range(n_linhas_log-1,0,-1): # linhas de forma decremental
+    for i in range(n_linhas_log-1,-1,-1): # linhas de forma decremental
         linha_start = arq_log[i].find("start " + list_redo[j]) # valor 1 (encontrou), valor -1(não encontrou)
         #print("encontrou: ",arq_log[i])
         if (linha_start == 1):
@@ -207,13 +215,21 @@ for i in range(n_linhas_log):
         break
 
 
-# Para print das operações que realizaram o REDO
+# Para print das operações que realizaram/passou pelo o REDO
 new_list = []
 for i in range(len(T_commits)):
     new_list.append(T_commits[i][1]) #lista todos que commitaram
 for i in range(len(list_redo)):
-    print("Transação", list_redo[i], "realizou REDO")
+    print("Transação", list_redo[i], "passará pelo REDO")
     new_list.remove(list_redo[i]) #remove os que realizaram redo
 #print("new", new_list)
 for i in range(len(new_list)):
     print("Transação", new_list[i], "não realizou REDO")
+
+
+#LER ARQUIVO JSON
+arq = open("metadado.json")
+linhas = arq.readlines()
+print("\n")
+for linha in linhas:
+    print(linha)
