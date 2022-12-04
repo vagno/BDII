@@ -229,7 +229,7 @@ for i in range(len(new_list)):
 
 
 #LER ARQUIVO JSON
-arq = open("metadado.json")
+arq = open("metadado.json") ## aqui para carregar o arquivo do json
 linhas = arq.readlines()
 print("\n")
 for linha in linhas:
