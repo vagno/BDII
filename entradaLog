@@ -5,12 +5,13 @@
 <commit T2>
 <start T3>
 <T3,2,B,30,1000>
-<commit T1>
 <start T4>
 <T4,1,A,2000,3000>
+<T4,1,B,12,13>
 <start T5>
-<CKPT (T3,T4,T5)>
+<CKPT (T1,T3,T4,T5)>
 <commit T4>
+<commit T1>
 <T5,2,A,20,1000>
 <T3,2,B,1000,8000>
 <crash>
