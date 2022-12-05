@@ -1,4 +1,5 @@
 #Criar banco de dados bd_log
+## carregar o banco 
 
 
 #Importar bibliotecas
